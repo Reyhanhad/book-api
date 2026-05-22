@@ -1,0 +1,33 @@
+services:
+  app:
+    build: .
+    container_name: book-api
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    container_name: book-db
+    environment:
+      POSTGRES_USER: book_user
+      POSTGRES_PASSWORD: book_password
+      POSTGRES_DB: book_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - book_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U book_user -d book_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  book_pgdata:
