@@ -30,8 +30,12 @@ const initDb = async () => {
             `);
     }
 };
+const checkDb = async () => {
+  await pool.query("SELECT 1");
+};
 
 module.exports = {
     pool,
     initDb,
+    checkDb,
 };

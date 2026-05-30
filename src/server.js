@@ -3,7 +3,7 @@ const cors = require("cors");
 require("dotenv").config();
 
 const bookRoutes = require("./routes/book.routes");
-const { initDb } = require("./config/database");
+const { initDb, checkDb } = require("./config/database");
 
 const app = express();
 
@@ -11,6 +11,23 @@ app.use(cors());
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
+
+app.get("/health", async (req, res) => {
+  try {
+    await checkDb();
+
+    res.json({
+      status: "ok",
+      database: "connected",
+    });
+  } catch (error) {
+    res.status(503).json({
+      status: "error",
+      database: "disconnected",
+      error: error.message,
+    });
+  }
+});
 
 app.get("/", (req, res) => {
   res.json({
