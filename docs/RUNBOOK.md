@@ -60,3 +60,62 @@ Do not use:
 docker compose down -v
 
 unless you intentionally want to delete the database volume.
+
+
+## Monitoring with Uptime Kuma
+
+### Purpose
+
+Uptime Kuma is used to monitor the Book API health endpoint.
+
+Monitoring target:
+
+```text
+http://app:3000/health
+
+Inside Docker Compose:
+
+uptime-kuma container → app:3000 → Express API container
+
+Check Uptime Kuma container
+docker compose ps
+docker compose logs --tail=100 uptime-kuma
+
+Access Dashboard
+
+From host machine:
+
+http://localhost:3001
+
+This works through VirtualBox port forwarding:
+
+Host 3001 → Guest 3001
+
+Symptom
+
+Uptime Kuma shows:
+
+Book API Health: Down
+Diagnosis
+docker compose ps -a
+docker compose logs --tail=100 app
+docker compose logs --tail=100 db
+curl -i http://localhost/health
+Possible Root Causes
+Express API container stopped
+Express API container restarting
+PostgreSQL container stopped
+Database connection failed
+/health endpoint returned 503
+Recovery
+docker compose start db
+docker compose restart app
+
+If still broken:
+
+docker compose down
+docker compose up -d --build
+
+Do not run:
+
+docker compose down -v
